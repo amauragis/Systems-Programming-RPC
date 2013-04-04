@@ -1,21 +1,19 @@
 CC = gcc
-EXEC = czy dzy
+EXEC = rclient1 rclient2 rserver
 CCFLAGS = -Wall -g -pedantic
-OBJS = czy.o dzy.o util.o
-TESTINGDIR = testing/
+OBJS = rclient1.o rclient2.o rserver.o
 
 all: ${EXEC}
 
 #${EXEC}: ${OBJS}
 #	${CC} ${CCFLAGS} -lm -o ${EXEC} ${OBJS}
 
-czy: czy.o util.o
-	${CC} ${CCFLAGS} -lm -o czy czy.o util.o
-dzy: dzy.o util.o
-	${CC} ${CCFLAGS} -lm -o dzy dzy.o util.o
-
-test: ${EXEC}
-	cp ${EXEC} ${TESTINGDIR}
+rclient1: rclient1.o
+	${CC} ${CCFLAGS} -lm -o rclient1 rclient1.o
+rclient2: rclient2.o
+	${CC} ${CCFLAGS} -lm -o rclient2 rclient2.o
+rserver: rserver.o
+	${CC} ${CCFLAGS} -lm -o rserver rserver.o
     
 clean:
 	rm -f ${EXEC} ${OBJS}
