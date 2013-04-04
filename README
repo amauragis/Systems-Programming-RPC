@@ -1,0 +1,49 @@
+Remote Procedure Calls:
+
+This project is a mini Remote Procedure Call (RPC) based system consisting of
+a server and a client.  Using the remote procedures supplied by the server our
+client program will be able to open files and directories, and perform
+computations on the server.
+
+
+The Server:
+
+The server opens a socket and listens on an available port.  Upon starting,
+the server will print the port number it is using on standard output.  The
+server and client will communicate through a TCP socket.  The server will
+support remote calling of the following functions:
+	- open
+	- close
+	- read
+	- write
+	- seek
+
+Remote calls will be handled as uppercase versions of the functions (ie
+Seek, Close, etc)
+
+
+The Client:
+
+The client program provides an environent into which we can plug an application
+and execute it using remote versions of the supportedd calls.  the client
+program therefore should expect a <hostnae> <portnumber> pair as its arguments
+and attempt to connect to the server.  Once it connects, it should call the
+user program which has a function called entry analogous to the main function
+in an ordinary C program.  The entry routine should have argv and argc and
+returns integer values.  The client program should strip off the first two 
+arguments, create a new argv array, and call the procedure.  Finally, when
+entry exits, the return value should be returned from the main procedure of the
+client.
+
+When the user links her programs(s) with your client, the combined program
+should compile into a workable binary.  Test your client with two user
+programs, one which remotedly opens an output file, locally opens an input file
+and copy the input file to the output file and close both files.  The second
+program should open a local file as output and a remote file as input.  It
+should seek the remote file to position 10 and copy the rest to the local file.
+
+Note: multiple clients can be in execution at any point in time.
+
+===============================================================================
+===============================================================================
+
