@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "rserver.h"
 #include "rpcdefs.h"
 
 int main()
@@ -96,19 +97,19 @@ int main()
                 switch (opcode)
                 {
                     case OPCODE_OPEN:
-
+                        call_open(connection);
                         break;
                     case OPCODE_CLOSE:
-
+                        call_close(connection);
                         break;
                     case OPCODE_READ:
-
+                        call_read(connection);
                         break;
                     case OPCODE_WRITE:
-
+                        call_write(connection);
                         break;
                     case OPCODE_SEEK:
-
+                        call_seek(connection);
                         break;
                 }
             }
@@ -123,3 +124,27 @@ int main()
 
 }
 
+int call_open(int connection)
+{
+
+}
+
+int call_close(int connection)
+{
+    
+}
+
+int call_read(int connection)
+{
+    
+}
+
+int call_write(int connection)
+{
+    
+}
+
+int call_seek(int connection)
+{
+    
+}

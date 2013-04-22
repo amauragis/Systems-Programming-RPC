@@ -16,6 +16,8 @@
 #define ACCEPT_ERROR    -5
 #define FORKING_ERROR   -6
 #define READ_ERROR      -7
+#define CONNECTION_ERROR -8
+
 
 typedef struct sockaddr_in sockaddr_in_t;
 typedef struct sockaddr sockaddr_t;
