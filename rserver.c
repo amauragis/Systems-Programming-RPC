@@ -70,6 +70,10 @@ int main()
         {
             return ACCEPT_ERROR;
         }
+        getsockname(listener, (sockaddr_t*) &conSocket, &conSocket_len);
+        char address[16];
+        inet_ntop(AF_INET,&conSocket.sin_addr,address, 16);
+        printf("Connection accepted from: %s on Port %d\n", address, ntohs(conSocket.sin_port));
 
         // now we have to fork to make sure we can allow additional connections
         pid_t pid = fork();
