@@ -1,7 +1,7 @@
 CC = gcc
 CCFLAGS = -Wall -g -pedantic
 LDFLAGS = 
-DEPS = myrpc.h
+DEPS = rpcdefs.h rclient.h rserver.h
 SOURCES = user_loc2rem.c user_rem2loc.c rclient.c rserver.c
 OBJS = ${SOURCES:.c=.o}
 EXEC = rclient1 rclient2 rserver

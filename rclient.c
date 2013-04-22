@@ -9,7 +9,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 
-#include "myrpc.h"
+#include "rpcdefs.h"
 
 int main (int argc, char* argv[])
 {

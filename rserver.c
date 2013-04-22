@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "myrpc.h"
+#include "rpcdefs.h"
 
 int main()
 {
@@ -17,11 +17,19 @@ int main()
     int connection;
     int length;
 
+    // create empty socket structs
     sockaddr_in_t lisSocket;
-    sockaddr_in_t conSocket;
+
+    memset(&lisSocket, 0, sizeof(sockaddr_in_t));
+
 
     // open a tcp socket
     listener = socket(AF_INET, SOCK_STREAM, 0);
+    if (listener == -1)
+    {
+        // socket error
+        return SOCKET_ERROR;
+    }
 
     // set up our socket struct to bind to
     lisSocket.sin_family = (short) AF_INET;
@@ -29,48 +37,89 @@ int main()
     lisSocket.sin_port = htons(0); // Bind to any open port
 
     // now we bind
-    // todo: error checking
     int bindval;
     length = sizeof(lisSocket);
     bindval = bind(listener, (sockaddr_t*) &lisSocket, length);
+    if (bindval == -1)
+    {
+        // bind error
+        return BIND_ERROR;
+    }
 
     // print out the port number of the socket
     getsockname(listener, (sockaddr_t*) &lisSocket, &length);
     printf("Server bound to port %d\n", ntohs(lisSocket.sin_port));
 
     // begin listening, we only accept one connection in the listening queue
-    listen(listener,1);
-    length = sizeof(conSocket);
+    if (-1 == listen(listener,1))
+    {
+        return LISTEN_ERROR;
+    }
 
-    // now we accept a new connection
-    connection = accept(listener, (sockaddr_t*) &conSocket, &length);
-
+    // main server loop after socket is setup and we are listening
     while (1) 
     {
-        // set up select
-        fd_set readfds, writefds;
-        struct timeval tv;
-        tv.tv_sec=0;
-        tv.tv_usec=0;
-        char ch;
-        FD_ZERO(&readfds);
-        // FD_ZERO(&writefds);
-        FD_SET(connection, &readfds);
-        // FD_SET(conn, &writefds);
+        sockaddr_in_t conSocket;
+        int conSocket_len = sizeof(sockaddr_in_t);
+        memset(&conSocket, 0, conSocket_len);
 
-        int selectval = select(0, &readfds, NULL, NULL, &tv);
-        // puts("through select");
-        if (selectval == -1)
-            perror("Something bad happened with select()");
-        else
+        // now we accept a new connection
+        connection = accept(listener, (sockaddr_t*) &conSocket, &conSocket_len);
+        if (connection == -1)
         {
-            if (FD_ISSET(connection, &readfds))
+            return ACCEPT_ERROR;
+        }
+
+        // now we have to fork to make sure we can allow additional connections
+        pid_t pid = fork();
+        if (pid == -1)
+        {
+            return FORKING_ERROR;
+        }
+        else if (pid == 0)
+        {
+            // Child.  Handle this connection by reading the opcode
+            while (1)
             {
-               
-                while(read(connection, &ch, 1) != 0)
-                    putchar(ch);   
+                unsigned char opcode;
+                int readval = read(connection, &opcode, 1);
+                if (readval < 0)
+                {
+                    return READ_ERROR;
+                }
+                else if (readval == 0)
+                {
+                    // nothing read
+                }
+
+                // opcode selects correct function to call
+                switch (opcode)
+                {
+                    case OPCODE_OPEN:
+
+                        break;
+                    case OPCODE_CLOSE:
+
+                        break;
+                    case OPCODE_READ:
+
+                        break;
+                    case OPCODE_WRITE:
+
+                        break;
+                    case OPCODE_SEEK:
+
+                        break;
+                }
             }
         }
+        else
+        {
+            // Parent, drop this connection, child has it
+            close(connection);
+        }
+
     }
 
 }
+
