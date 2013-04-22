@@ -28,7 +28,7 @@ int main (int argc, char* argv[])
 
     // get remote host and port
     remhost = argv[1];
-    remport = htons((unsigned short)atoi(argv[2]));
+    remport = atoi(argv[2]);
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
@@ -48,7 +48,7 @@ int main (int argc, char* argv[])
 
     if (-1 == connect(sock, (sockaddr_t*)&s, sizeof(sockaddr_in_t)))
     {
-        perror("Connection error.");
+        perror("Connection Failure");
         return CONNECTION_ERROR;
     }
 
