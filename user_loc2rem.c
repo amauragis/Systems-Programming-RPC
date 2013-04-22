@@ -1,4 +1,4 @@
-int main()
+int entry()
 {
     return 0;
 }
