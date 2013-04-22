@@ -19,6 +19,8 @@
 #define CONNECTION_ERROR -8
 #define MALLOC_ERROR    -9
 #define WRITE_ERROR     -10
+#define ARGS_ERROR      -11
+#define GETHOST_ERROR   -12
 
 typedef struct sockaddr_in sockaddr_in_t;
 typedef struct sockaddr sockaddr_t;

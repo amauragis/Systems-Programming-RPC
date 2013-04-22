@@ -17,6 +17,12 @@ static int connection = -1;
 
 int main (int argc, char* argv[])
 {
+    if (argc < 3)
+    {
+        perror("Not enough arguments.");
+        exit(ARGS_ERROR);
+    }
+
     char* remhost;
     unsigned short remport;
 
@@ -24,6 +30,46 @@ int main (int argc, char* argv[])
     remhost = argv[1];
     remport = htons((unsigned short)atoi(argv[2]));
 
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+    {
+        perror("Socket error!");
+        exit(SOCKET_ERROR);
+    }
+
+    // populate socket struct
+    sockaddr_in_t s;
+    struct hostent* hostaddr = gethostbyname(remhost);
+    if(hostaddr == NULL) return GETHOST_ERROR;
+    memset(&s, 0, sizeof(sockaddr_in_t));
+    s.sin_family = AF_INET;
+    memcpy(&s.sin_addr, hostaddr->h_addr, hostaddr->h_length);
+    s.sin_port = htons(remport);
+
+    if (-1 == connect(sock, (sockaddr_t*)&s, sizeof(sockaddr_in_t)))
+    {
+        perror("Connection error.");
+        return CONNECTION_ERROR;
+    }
+
+    // now that we have the socket working, we copy it into the static variable
+    connection = sock;
+
+    // everything shoudl be setup and we're ready to invoke the client program
+    char** newArgv = (char**)calloc((1+(argc-3)), sizeof(char*));
+    newArgv[0] = "user_program";
+    int i;
+    for (i=3; i<argc; i++)
+    {
+        newArgv[i-2] = argv[i];
+    }
+    int newArgc = (1+(argc-3));
+
+    // Call user program
+    int ret = entry(newArgc, newArgv);
+
+    // Free memory
+    free(newArgv);
     return 0;
 }
 

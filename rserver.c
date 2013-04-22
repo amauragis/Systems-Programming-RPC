@@ -127,6 +127,7 @@ int main()
                         break;
 
                 }
+                fprintf(stderr, "Exit code: %d\n",ret);
                 exit(ret);
             }
         }
