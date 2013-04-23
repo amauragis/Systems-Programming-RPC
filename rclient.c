@@ -73,11 +73,12 @@ int main (int argc, char* argv[])
 
     // Free memory
     free(newArgv);
-    return 0;
+    return ret;
 }
 
 int Open(const char* pathname, int flags, mode_t mode)
 {
+    puts("OPEN!");
     // first we calculate the length we need
     // 1 byte for opcode, path name, null, flags
     int path_length = strlen(pathname);
@@ -131,6 +132,7 @@ int Open(const char* pathname, int flags, mode_t mode)
 
 int Close(int fd)
 {
+    puts("CLOSE!");
     // length is opcode + file descriptor
     int pktLength = (1 + sizeof(int));
 
@@ -174,7 +176,52 @@ ssize_t Read(int fd, void* buf, size_t count)
 
 ssize_t Write(int fd, const void* buf, size_t count)
 {
-    return 0;
+    puts("WRITE!");
+    // message length: opcode + fd + buffer length + count
+    int pktLength = 1 + sizeof(int) + count + sizeof(size_t);
+
+    // build the packet
+    int pktIndex = 0;
+    unsigned char pkt[pktLength];
+
+    // copy in opcode
+    pkt[pktIndex] = OPCODE_WRITE;
+    pktIndex++;
+
+    // copy in fd
+    memcpy(pkt+pktIndex, &fd, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // copy in count
+    // had to switch this around with buf so we know where count
+    // will be in the packet
+    memcpy(pkt+pktIndex, &count, sizeof(size_t));
+    pktIndex += sizeof(count);
+
+    // copy in buf
+    memcpy(pkt+pktIndex, buf, count);
+    pktIndex += count;
+
+    // verify socket is correct
+    if (connection == -1)
+    {
+        return CONNECTION_ERROR;
+    }
+
+    // write packet to server
+    int writeval = write(connection, pkt, pktLength);
+    // check write val
+
+    // get response from server
+    int response[2];
+    int readval = read(connection, response, 2*sizeof(int));
+    // do something with readval
+
+    int func_return = response[0];
+    int func_errno = response[1];
+    errno = func_errno;
+    return func_return;
+
 }
 
 off_t Lseek(int fd, off_t offset, int whence)

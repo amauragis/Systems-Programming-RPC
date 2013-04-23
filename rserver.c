@@ -8,6 +8,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 #include "rserver.h"
@@ -49,7 +51,7 @@ int main()
     }
 
     // print out the port number of the socket
-    getsockname(listener, (sockaddr_t*) &lisSocket, &length);
+    getsockname(listener, (sockaddr_t*) &lisSocket, (socklen_t*)&length);
     printf("Server bound to port %d\n", ntohs(lisSocket.sin_port));
 
     // begin listening, we only accept one connection in the listening queue
@@ -66,7 +68,7 @@ int main()
         memset(&conSocket, 0, conSocket_len);
 
         // now we accept a new connection
-        connection = accept(listener, (sockaddr_t*) &conSocket, &conSocket_len);
+        connection = accept(listener, (sockaddr_t*) &conSocket, (socklen_t*)&conSocket_len);
         if (connection == -1)
         {
             return ACCEPT_ERROR;
@@ -104,18 +106,23 @@ int main()
                 switch (opcode)
                 {
                     case OPCODE_OPEN:
+                        puts("Open!");
                         ret = call_open(connection);
                         break;
                     case OPCODE_CLOSE:
+                        puts("Close!");
                         ret = call_close(connection);
                         break;
                     case OPCODE_READ:
+                        puts("Read!");
                         ret = call_read(connection);
                         break;
                     case OPCODE_WRITE:
+                        puts("Write!");
                         ret = call_write(connection);
                         break;
                     case OPCODE_SEEK:
+                        puts("Seek!");
                         ret = call_seek(connection);
                         break;
                 }
@@ -128,7 +135,7 @@ int main()
 
                 }
                 fprintf(stderr, "Exit code: %d\n",ret);
-                exit(ret);
+                fflush(stderr);
             }
         }
         else
@@ -144,11 +151,11 @@ int main()
 int call_open(int connection)
 {
     int bufSize = 80;
-    unsigned char* pathBuf = malloc(bufSize*sizeof(char));
+    char* pathBuf = malloc(bufSize*sizeof(char));
     if (pathBuf == NULL) return MALLOC_ERROR;
 
     int index = 0;
-    unsigned char currChar = 0;
+    char currChar = 0;
     int readval;
     do 
     {
@@ -245,19 +252,70 @@ int call_close(int connection)
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
+    return 0;
+
 }
 
 int call_read(int connection)
 {
-    
+    return 0;
 }
 
 int call_write(int connection)
 {
-    
+    // Read in fd
+    int fd = 0;
+    int readval = read(connection, &fd, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // read in count
+    size_t count = 0;
+    readval = read(connection, &count, sizeof(size_t));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // read in the data
+    unsigned char buf[count];
+    readval = read(connection, buf, count);
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // all data in, now run command
+    int func_ret = write(fd, buf, count);
+    int func_errno = errno;
+
+    // now we have to write our message back, which is the return and error values
+    int pktLength = 2*sizeof(int);
+    int pkt[2];
+    pkt[0] = func_ret;
+    pkt[1] = func_errno;
+
+    int writeval = write(connection, pkt, pktLength);
+    if (writeval == 0)
+    {
+        // socket closed?
+        perror("cannot write. Socket closed?");
+    }
+    else if (writeval < pktLength) return WRITE_ERROR;
+
+    return 0;
+
 }
 
 int call_seek(int connection)
 {
-    
+    return 0;
 }

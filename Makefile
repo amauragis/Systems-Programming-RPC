@@ -1,5 +1,5 @@
 CC = gcc
-CCFLAGS = -Wall -g -pedantic
+CCFLAGS = -Wall -g -std=gnu99
 LDFLAGS = 
 DEPS = rpcdefs.h rclient.h rserver.h
 SOURCES = user_loc2rem.c user_rem2loc.c rclient.c rserver.c
@@ -9,7 +9,7 @@ EXEC = rclient1 rclient2 rserver
 all: ${SOURCES} ${EXEC}
 
 %.o: %.c $(DEPS)
-	$(CC) -c -g -o $@ $<
+	$(CC) -c -Wall -std=gnu99 -g -o $@ $<
 
 rclient1: rclient.o user_loc2rem.o
 	${CC} ${CCFLAGS} -lm -o rclient1 rclient.o user_loc2rem.o
