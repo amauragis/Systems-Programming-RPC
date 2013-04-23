@@ -392,5 +392,53 @@ int call_write(int connection)
 
 int call_seek(int connection)
 {
+    // read in fd
+    int fd = 0;
+    int readval = read(connection, &fd, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // read in offset
+    off_t offset = 0;
+    readval = read(connection, &offset, sizeof(off_t));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // read in whence
+    int whence = 0;
+    readval = read(connection, &whence, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // run lseek
+    int func_ret = lseek(fd, offset, whence);
+    int func_errno = errno;
+
+    // now we have to write our message back, which is the return and error values
+    int pktLength = 2*sizeof(int);
+    int pkt[2];
+    pkt[0] = func_ret;
+    pkt[1] = func_errno;
+
+    int writeval = write(connection, pkt, pktLength);
+    if (writeval == 0)
+    {
+        // socket closed?
+        perror("cannot write. Socket closed?");
+    }
+    else if (writeval < pktLength) return WRITE_ERROR;
+    
     return 0;
 }

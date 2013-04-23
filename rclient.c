@@ -272,5 +272,50 @@ ssize_t Write(int fd, const void* buf, size_t count)
 
 off_t Lseek(int fd, off_t offset, int whence)
 {
-    return 0;
+    // length: opcode, fd, offset, whence
+    int pktLength = 1+ 2*sizeof(int) + sizeof(off_t);
+
+    // build packet
+    int pktIndex = 0;
+    unsigned char pkt[pktIndex];
+
+    // copy opcode
+    pkt[pktIndex] = OPCODE_SEEK;
+    pktIndex++;
+
+    // copy fd
+    memcpy(pkt+pktIndex, &fd, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // copy offset
+    memcpy(pkt+pktIndex, &offset, sizeof(off_t));
+    pktIndex += sizeof(off_t);
+
+    // copy whence
+
+    memcpy(pkt+pktIndex, &whence, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // verify socket is correct
+    if (connection == -1)
+    {
+        perror("Static socket invalid");
+        return CONNECTION_ERROR;
+    }
+
+    // write packet to server
+    int writeval = write(connection, pkt, pktLength);
+    // check write val
+
+
+    // get response from server
+    int response[2];
+    int readval = read(connection, response, 2*sizeof(int));
+    // do something with readval
+
+    int func_return = response[0];
+    int func_errno = response[1];
+    errno = func_errno;
+    return func_return;
+
 }
