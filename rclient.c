@@ -48,7 +48,7 @@ int main (int argc, char* argv[])
 
     if (-1 == connect(sock, (sockaddr_t*)&s, sizeof(sockaddr_in_t)))
     {
-        perror("Connection Failure");
+        err(1, NULL);
         return CONNECTION_ERROR;
     }
 
