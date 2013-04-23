@@ -124,6 +124,20 @@ int Open(const char* pathname, int flags)
 
 int Close(int fd)
 {
+    // length is opcode + file descriptor
+    int pktLength = (1 + sizeof(int));
+
+    // create packet
+    int index = 0;
+    unsigned char pkt[pktLength];
+
+    // copy in opcode
+    pkt[index] = OPCODE_CLOSE;
+    index++;
+
+    // copy in file descriptor
+    memcpy(&pkt[index], &fd, sizeof(int));
+
     return 0;
 }
 
