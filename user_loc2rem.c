@@ -8,7 +8,7 @@
 
 int entry(int argc, char* argv[])
 {
-    int rslt = Open("myfile1", O_CREAT | O_APPEND, 0644);
+    int rslt = Open("myfile1", O_CREAT | O_APPEND | O_WRONLY, 0644);
     printf("I opened fd: %d\n", rslt);
 
     printf("I'm going to try to write 'dicks dicks dicks\\n' to a file\n");
@@ -16,8 +16,8 @@ int entry(int argc, char* argv[])
 
     printf("Write return: %d\n", writeval);
 
-    // int closeval = Close(rslt);
-    // printf("Close result: %d\n",closeval);
+    int closeval = Close(rslt);
+    printf("Close return: %d\n",closeval);
 
     return 0;
 

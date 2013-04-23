@@ -19,7 +19,7 @@ int main (int argc, char* argv[])
 {
     if (argc < 3)
     {
-        perror("Not enough arguments.");
+        fprintf(stderr,"Not enough arguments");
         exit(ARGS_ERROR);
     }
 
@@ -33,7 +33,7 @@ int main (int argc, char* argv[])
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
     {
-        perror("Socket error!");
+        perror("Socket error");
         exit(SOCKET_ERROR);
     }
 
@@ -51,7 +51,7 @@ int main (int argc, char* argv[])
     if (-1 == connect(sock, (sockaddr_t*)&s, sizeof(sockaddr_in_t)))
     {
         // err(1, NULL);
-        perror("DICKS DICKS FUCK");
+        perror("Cannot connect");
         return CONNECTION_ERROR;
     }
 
@@ -112,6 +112,7 @@ int Open(const char* pathname, int flags, mode_t mode)
 
     if (connection == -1)
     {
+        perror("Static socket invalid");
         return CONNECTION_ERROR;
     }
 
@@ -150,6 +151,7 @@ int Close(int fd)
     // verify socket is correct
     if (connection == -1)
     {
+        perror("Static socket invalid");
         return CONNECTION_ERROR;
     }
 
@@ -193,6 +195,7 @@ ssize_t Read(int fd, void* buf, size_t count)
     // verify socket is correct
     if (connection == -1)
     {
+        perror("Static socket invalid");
         return CONNECTION_ERROR;
     }
 
@@ -247,6 +250,7 @@ ssize_t Write(int fd, const void* buf, size_t count)
     // verify socket is correct
     if (connection == -1)
     {
+        perror("Static socket invalid");
         return CONNECTION_ERROR;
     }
 

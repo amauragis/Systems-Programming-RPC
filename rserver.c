@@ -32,6 +32,7 @@ int main()
     if (listener == -1)
     {
         // socket error
+        perror("Could not open socket");
         return SOCKET_ERROR;
     }
 
@@ -47,6 +48,7 @@ int main()
     if (bindval == -1)
     {
         // bind error
+        perror("Bind error");
         return BIND_ERROR;
     }
 
@@ -57,6 +59,7 @@ int main()
     // begin listening, we only accept one connection in the listening queue
     if (-1 == listen(listener,1))
     {
+        perror("Could not set up listener");
         return LISTEN_ERROR;
     }
 
@@ -71,6 +74,7 @@ int main()
         connection = accept(listener, (sockaddr_t*) &conSocket, (socklen_t*)&conSocket_len);
         if (connection == -1)
         {
+            perror("Could not accept");
             return ACCEPT_ERROR;
         }
         char host[NI_MAXHOST];
@@ -83,6 +87,7 @@ int main()
         pid_t pid = fork();
         if (pid == -1)
         {
+            perror("We forking failed");
             return FORKING_ERROR;
         }
         else if (pid == 0)
@@ -96,11 +101,13 @@ int main()
                 int readval = read(connection, &opcode, 1);
                 if (readval < 0)
                 {
+                    perror("Could not read from connection");
                     return READ_ERROR;
                 }
                 else if (readval == 0)
                 {
                     // nothing read
+                    puts("Operatation completed");
                     exit(0);
                 }
 
@@ -129,17 +136,21 @@ int main()
                         ret = call_seek(connection);
                         break;
                 }
-                switch(ret)
+                if (ret != 0)
                 {
-                    case MALLOC_ERROR:
-                        perror("Malloc error");
-                        break;
-
-                }
+                   switch(ret)
+                    {
+                        case MALLOC_ERROR:
+                            perror("Malloc error");
+                            break;
+                        default:
+                            perror("Unspecified error");
+                            break;
+                    } 
+                }                
                 fprintf(stderr, "Exit code: %d\n",ret);
                 fflush(stderr);
-                // exit(ret);
-                // break; something here is awry
+
             }
         }
         else
@@ -322,6 +333,7 @@ int call_read(int connection)
 int call_write(int connection)
 {
     // Read in fd
+    puts("SERVER: Write entered");
     int fd = 0;
     int readval = read(connection, &fd, sizeof(int));
     if (readval == -1) return READ_ERROR;
@@ -330,6 +342,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
+    printf("Got FD from client: %d\n",fd);
 
     // read in count
     size_t count = 0;
@@ -340,6 +353,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
+    printf("Got count from client: %d\n",(int)count);
 
     // read in the data
     unsigned char buf[count];
@@ -350,12 +364,13 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
+    printf("Got data from client: %s\n",buf);
 
     // all data in, now run command
     printf("FD: %d\n", fd);
     int func_ret = write(fd, buf, count);
     int func_errno = errno;
-    perror("error?");
+    perror("write error");
 
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);
