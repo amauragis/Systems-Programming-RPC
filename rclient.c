@@ -171,7 +171,49 @@ int Close(int fd)
 
 ssize_t Read(int fd, void* buf, size_t count)
 {
-    return 0;
+    // length will be opcode + fd + count
+    int pktLength = 1 + sizeof(int) + sizeof(size_t);
+
+    // create a packet
+    int pktIndex = 0;
+    unsigned char pkt[pktLength];
+
+    // copy in opcode
+    pkt[pktIndex] = OPCODE_READ;
+    pktIndex++;
+
+    // copy fd
+    memcpy(pkt+pktIndex, &fd, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // copy count
+    memcpy(pkt+pktIndex, &count, sizeof(size_t));
+    pktIndex += sizeof(size_t);
+
+    // verify socket is correct
+    if (connection == -1)
+    {
+        return CONNECTION_ERROR;
+    }
+
+    int writeval = write(connection, pkt, pktLength);
+    // check writeval
+
+    // get response from server
+    int response[2];
+    void* readbuf[count];
+    int readval = read(connection, response, 2*sizeof(int));
+    // do something with readval
+
+    // get read buffer from server
+    readval = read(connection, readbuf, count);
+
+    int func_return = response[0];
+    int func_errno = response[1];
+    memcpy(buf, readbuf, count);
+    errno = func_errno;
+    return func_return;
+
 }
 
 ssize_t Write(int fd, const void* buf, size_t count)

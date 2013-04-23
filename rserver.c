@@ -263,6 +263,59 @@ int call_close(int connection)
 
 int call_read(int connection)
 {
+    // read in fd
+    int fd = 0;
+    int readval = read(connection, &fd, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // read in count
+    size_t count = 0;
+    readval = read(connection, &count, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+
+    // run command
+    void* buf[count];
+    int func_ret = read(fd, buf, count);
+    int func_errno = errno;
+
+    // now we return the info, size is ret val + err val + data
+    int pktLength = 2*sizeof(int) + count;
+
+    // build new message packet
+    int pktIndex = 0;
+    unsigned char pkt[pktLength];
+
+    // copy in ret val
+    memcpy(pkt+pktIndex, &func_ret, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // copy in errno
+    memcpy(pkt+pktIndex, &func_errno, sizeof(int));
+    pktIndex += sizeof(int);
+
+    // copy in buffer
+    memcpy(pkt+pktIndex, buf, count);
+    pktIndex += count;
+
+    // write packet to server
+    int writeval = write(connection, pkt, pktLength);
+    if (writeval == 0)
+    {
+        // socket closed?
+        perror("cannot write. Socket closed?");
+    }
+    else if (writeval < pktLength) return WRITE_ERROR;
+
     return 0;
 }
 
