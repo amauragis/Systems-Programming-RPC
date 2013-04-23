@@ -78,7 +78,7 @@ int main (int argc, char* argv[])
 
 int Open(const char* pathname, int flags, mode_t mode)
 {
-    puts("OPEN!");
+    // puts("OPEN!");
     // first we calculate the length we need
     // 1 byte for opcode, path name, null, flags
     int path_length = strlen(pathname);
@@ -133,7 +133,7 @@ int Open(const char* pathname, int flags, mode_t mode)
 
 int Close(int fd)
 {
-    puts("CLOSE!");
+    // puts("CLOSE!");
     // length is opcode + file descriptor
     int pktLength = (1 + sizeof(int));
 
@@ -221,7 +221,7 @@ ssize_t Read(int fd, void* buf, size_t count)
 
 ssize_t Write(int fd, const void* buf, size_t count)
 {
-    puts("WRITE!");
+    // puts("WRITE!");
     // message length: opcode + fd + buffer length + count
     int pktLength = 1 + sizeof(int) + count + sizeof(size_t);
 

@@ -116,23 +116,23 @@ int main()
                 switch (opcode)
                 {
                     case OPCODE_OPEN:
-                        puts("Open!");
+                        // puts("Open!");
                         ret = call_open(connection);
                         break;
                     case OPCODE_CLOSE:
-                        puts("Close!");
+                        // puts("Close!");
                         ret = call_close(connection);
                         break;
                     case OPCODE_READ:
-                        puts("Read!");
+                        // puts("Read!");
                         ret = call_read(connection);
                         break;
                     case OPCODE_WRITE:
-                        puts("Write!");
+                        // puts("Write!");
                         ret = call_write(connection);
                         break;
                     case OPCODE_SEEK:
-                        puts("Seek!");
+                        // puts("Seek!");
                         ret = call_seek(connection);
                         break;
                 }
@@ -333,7 +333,7 @@ int call_read(int connection)
 int call_write(int connection)
 {
     // Read in fd
-    puts("SERVER: Write entered");
+    // puts("SERVER: Write entered");
     int fd = 0;
     int readval = read(connection, &fd, sizeof(int));
     if (readval == -1) return READ_ERROR;
@@ -342,7 +342,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
-    printf("Got FD from client: %d\n",fd);
+    // printf("Got FD from client: %d\n",fd);
 
     // read in count
     size_t count = 0;
@@ -353,7 +353,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
-    printf("Got count from client: %d\n",(int)count);
+    // printf("Got count from client: %d\n",(int)count);
 
     // read in the data
     unsigned char buf[count];
@@ -364,10 +364,10 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
-    printf("Got data from client: %s\n",buf);
+    // printf("Got data from client: %s\n",buf);
 
     // all data in, now run command
-    printf("FD: %d\n", fd);
+    // printf("FD: %d\n", fd);
     int func_ret = write(fd, buf, count);
     int func_errno = errno;
     perror("write error");
