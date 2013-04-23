@@ -172,8 +172,10 @@ int call_open(int connection)
     int index = 0;
     char currChar = 0;
     int readval;
+
     do 
     {
+        
         readval = read(connection, &currChar, 1);
         if (readval == -1) return READ_ERROR;
         if (readval == 0)
@@ -196,7 +198,10 @@ int call_open(int connection)
 
     } while (currChar != 0);
 
+    printf("rx'd path: %s\n",pathBuf);
+
     // now we have to get the flags
+    puts("reading flags");
     int flags = 0;
     readval = read(connection, &flags, sizeof(int));
     if (readval == 0)
@@ -207,14 +212,17 @@ int call_open(int connection)
     else if (readval != sizeof(int)) return READ_ERROR;
 
     // now we need to get the mode
+    // puts("reading mode");
     mode_t mode = 0;
     readval = read(connection, &mode, sizeof(mode_t));
+    printf("Read mode: %d bytes\n", readval);
+    printf("sizeof(mode_t): %d\n", sizeof(mode_t));
     if (readval == 0)
     {
         // socket closed?
         perror("nothing to read. Socket closed?");
     }
-    else if (readval != sizeof(int)) return READ_ERROR;
+    else if (readval != sizeof(mode_t)) return READ_ERROR;
 
     // we have built our command... lets try it
     int func_ret = open(pathBuf, flags, mode);
@@ -439,6 +447,6 @@ int call_seek(int connection)
         perror("cannot write. Socket closed?");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
-    
+
     return 0;
 }
