@@ -6,9 +6,11 @@
 
 #include "rclient.h"
 
-int entry()
+int entry(int argc, char* argv[])
 {
-    int rslt = Open("myfile1", O_CREAT | O_APPEND);
-    printf("Open result: %d\n",rslt);
+    int rslt = Open("myfile1", O_CREAT | O_APPEND, 0744);
+    puts("I opened!");
+    int closeval = Close(rslt);
+    printf("Open result: %d\n",closeval);
 
 }

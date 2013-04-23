@@ -152,7 +152,7 @@ int call_open(int connection)
     int readval;
     do 
     {
-       readval = read(connection, &currChar, 1);
+        readval = read(connection, &currChar, 1);
         if (readval == -1) return READ_ERROR;
         if (readval == 0)
         {
@@ -184,8 +184,18 @@ int call_open(int connection)
     }
     else if (readval != sizeof(int)) return READ_ERROR;
 
+    // now we need to get the mode
+    mode_t mode = 0;
+    readval = read(connection, &mode, sizeof(mode_t));
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+    else if (readval != sizeof(int)) return READ_ERROR;
+
     // we have built our command... lets try it
-    int func_ret = open(pathBuf, flags);
+    int func_ret = open(pathBuf, flags, mode);
     int func_errno = errno;
 
     // now we have to write our message back, which is the return and error values
@@ -208,7 +218,33 @@ int call_open(int connection)
 
 int call_close(int connection)
 {
-    
+    // read the file descriptor from the packet
+    int fd = 0;
+    int readval = read(connection, &fd, sizeof(int));
+    if (readval == -1) return READ_ERROR;
+    if (readval == 0)
+    {
+        // socket closed?
+        perror("nothing to read. Socket closed?");
+    }
+    // have all parameters now run command
+    int func_ret = close(fd);
+    int func_errno = errno;
+
+    // now we have to write our message back, which is the return and error values
+    int pktLength = 2*sizeof(int);
+    int pkt[2];
+    pkt[0] = func_ret;
+    pkt[1] = func_errno;
+
+    int writeval = write(connection, pkt, pktLength);
+    if (writeval == 0)
+    {
+        // socket closed?
+        perror("cannot write. Socket closed?");
+    }
+    else if (writeval < pktLength) return WRITE_ERROR;
+
 }
 
 int call_read(int connection)

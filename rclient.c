@@ -41,14 +41,17 @@ int main (int argc, char* argv[])
     sockaddr_in_t s;
     struct hostent* hostaddr = gethostbyname(remhost);
     if(hostaddr == NULL) return GETHOST_ERROR;
+
     memset(&s, 0, sizeof(sockaddr_in_t));
+
     s.sin_family = AF_INET;
     memcpy(&s.sin_addr, hostaddr->h_addr, hostaddr->h_length);
     s.sin_port = htons(remport);
 
     if (-1 == connect(sock, (sockaddr_t*)&s, sizeof(sockaddr_in_t)))
     {
-        err(1, NULL);
+        // err(1, NULL);
+        perror("DICKS DICKS FUCK");
         return CONNECTION_ERROR;
     }
 
@@ -73,12 +76,12 @@ int main (int argc, char* argv[])
     return 0;
 }
 
-int Open(const char* pathname, int flags)
+int Open(const char* pathname, int flags, mode_t mode)
 {
     // first we calculate the length we need
     // 1 byte for opcode, path name, null, flags
     int path_length = strlen(pathname);
-    int pkt_length = 1 + path_length + 1 + sizeof(int);
+    int pkt_length = 1 + path_length + 1 + sizeof(int) + sizeof(mode_t);
 
     // now we initalize an rpc packet
     int pktIndex = 0;
@@ -100,6 +103,10 @@ int Open(const char* pathname, int flags)
     // copy flags
     memcpy(pkt+pktIndex, &flags, sizeof(int));
     pktIndex += sizeof(int);
+
+    // copy mode
+    memcpy(pkt+pktIndex, &mode, sizeof(mode_t));
+    pktIndex += sizeof(mode_t);
 
 
     if (connection == -1)
@@ -138,7 +145,26 @@ int Close(int fd)
     // copy in file descriptor
     memcpy(&pkt[index], &fd, sizeof(int));
 
-    return 0;
+    // verify socket is correct
+    if (connection == -1)
+    {
+        return CONNECTION_ERROR;
+    }
+
+    // write packet to server
+    int writeval = write(connection, pkt, pktLength);
+
+    // check value of write here
+
+    // get response from server
+    int response[2];
+    int readval = read(connection, response, 2*sizeof(int));
+    // do something with readval
+
+    int func_return = response[0];
+    int func_errno = response[1];
+    errno = func_errno;
+    return func_return;
 }
 
 ssize_t Read(int fd, void* buf, size_t count)
