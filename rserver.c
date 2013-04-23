@@ -88,8 +88,10 @@ int main()
         else if (pid == 0)
         {
             // Child.  Handle this connection by reading the opcode
+            close(listener);
             while (1)
             {
+                
                 unsigned char opcode;
                 int readval = read(connection, &opcode, 1);
                 if (readval < 0)
@@ -99,6 +101,7 @@ int main()
                 else if (readval == 0)
                 {
                     // nothing read
+                    exit(0);
                 }
 
                 int ret;
@@ -126,7 +129,6 @@ int main()
                         ret = call_seek(connection);
                         break;
                 }
-                // exit with the error code of this process
                 switch(ret)
                 {
                     case MALLOC_ERROR:
@@ -136,6 +138,8 @@ int main()
                 }
                 fprintf(stderr, "Exit code: %d\n",ret);
                 fflush(stderr);
+                // exit(ret);
+                // break; something here is awry
             }
         }
         else
@@ -204,6 +208,7 @@ int call_open(int connection)
     // we have built our command... lets try it
     int func_ret = open(pathBuf, flags, mode);
     int func_errno = errno;
+    printf("opened fd: %d\n", func_ret);
 
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);
@@ -294,8 +299,10 @@ int call_write(int connection)
     }
 
     // all data in, now run command
+    printf("FD: %d\n", fd);
     int func_ret = write(fd, buf, count);
     int func_errno = errno;
+    perror("error?");
 
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);

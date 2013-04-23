@@ -16,8 +16,8 @@ int entry(int argc, char* argv[])
 
     printf("Write return: %d\n", writeval);
 
-    int closeval = Close(rslt);
-    printf("Close result: %d\n",closeval);
+    // int closeval = Close(rslt);
+    // printf("Close result: %d\n",closeval);
 
     return 0;
 

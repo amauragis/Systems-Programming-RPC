@@ -196,7 +196,7 @@ ssize_t Write(int fd, const void* buf, size_t count)
     // had to switch this around with buf so we know where count
     // will be in the packet
     memcpy(pkt+pktIndex, &count, sizeof(size_t));
-    pktIndex += sizeof(count);
+    pktIndex += sizeof(size_t);
 
     // copy in buf
     memcpy(pkt+pktIndex, buf, count);
