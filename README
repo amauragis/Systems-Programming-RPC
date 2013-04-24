@@ -1,3 +1,18 @@
+RPC: Homework 4
+Andrew Mauragis
+
+All parts of this program operate within specified parameters, tested to the
+point which is described in the TESTS file.
+
+The program follows specifications with the one deviation of swapping the
+position of the "count" and the value of the buffer in the read function.
+
+The program should be interoperable with all servers and clients on the same
+architecture provided they also made the aforementioned swap.
+ 
+==============================================================================
+Program Description:
+==============================================================================
 Remote Procedure Calls:
 
 This project is a mini Remote Procedure Call (RPC) based system consisting of
@@ -46,4 +61,3 @@ Note: multiple clients can be in execution at any point in time.
 
 ===============================================================================
 ===============================================================================
-

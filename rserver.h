@@ -1,3 +1,9 @@
+// rserver.h
+// Andrew Mauragis
+// Due 4/25/13
+//
+// Provides function prototypes for rserver.c
+
 #ifndef RSERVER_H
 #define RSERVER_H
 

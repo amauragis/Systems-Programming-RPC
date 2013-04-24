@@ -1,3 +1,6 @@
+# Makefile for CS3411 HW4
+# Andrew Mauragis
+
 CC = gcc
 CCFLAGS = -Wall -g -std=gnu99
 LDFLAGS = -lm
@@ -8,6 +11,7 @@ EXEC = rclient1 rclient2 rserver
 
 all: $(SOURCES) $(EXEC)
 
+# Build all the object files
 %.o: %.c $(DEPS)
 	$(CC) -c $(CCFLAGS) -o $@ $<
 
@@ -17,10 +21,6 @@ rclient2: rclient.o user_rem2loc.o
 	$(CC) $(CCFLAGS) $(LDFLAGS) -o $@ $^
 rserver: rserver.o
 	$(CC) $(CCFLAGS) $(LDFLAGS) -o $@ $^
-
-# ${EXEC}: ${OBJS}
-# 	${CC} ${LDFLAGS} ${OBJS} -o $@
-
 
 clean:
 	rm -f $(EXEC) $(OBJS)

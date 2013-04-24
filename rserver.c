@@ -1,3 +1,11 @@
+// rserver.c
+// Andrew Mauragis
+// Due 4/25/13
+//
+// This file runs the remote procedure call server.  It provides the ability
+// for connected clients to run the open, close, read, write, and seek system
+// calls on the server and returns the results.
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -15,6 +23,12 @@
 #include "rserver.h"
 #include "rpcdefs.h"
 
+// main
+// Runs the server.  Starts by setting up a TCP socket and listening for connections.
+// When the server recieves a connection, it forks a child to deal with it so it can
+// continue listening for subsequent connections.
+//
+// returns an integer error code
 int main()
 {
     int listener;
@@ -26,12 +40,10 @@ int main()
 
     memset(&lisSocket, 0, sizeof(sockaddr_in_t));
 
-
     // open a tcp socket
     listener = socket(AF_INET, SOCK_STREAM, 0);
     if (listener == -1)
     {
-        // socket error
         perror("Could not open socket");
         return SOCKET_ERROR;
     }
@@ -66,6 +78,7 @@ int main()
     // main server loop after socket is setup and we are listening
     while (1) 
     {
+        // set up connecting socket for new connections
         sockaddr_in_t conSocket;
         int conSocket_len = sizeof(sockaddr_in_t);
         memset(&conSocket, 0, conSocket_len);
@@ -77,10 +90,10 @@ int main()
             perror("Could not accept");
             return ACCEPT_ERROR;
         }
+
+        // get name of host and print it out on server
         char host[NI_MAXHOST];
         getnameinfo((struct sockaddr*)&conSocket, conSocket_len,host,sizeof(host), NULL, 0, 0);
-        
-
         printf("[RSERVER] Connection accepted from: %s\n", host);
 
         // now we have to fork to make sure we can allow additional connections
@@ -93,10 +106,14 @@ int main()
         else if (pid == 0)
         {
             // Child.  Handle this connection by reading the opcode
+
+            // don't need the listener as the child
             close(listener);
+
+            // child now ready to handle operations from client            
             while (1)
             {
-                
+                // get the opcode
                 unsigned char opcode;
                 int readval = read(connection, &opcode, 1);
                 if (readval < 0)
@@ -106,36 +123,43 @@ int main()
                 }
                 else if (readval == 0)
                 {
-                    // nothing read
+                    // nothing read.  This means the client
+                    // probably closed the socket, and this child can die
                     printf("[RSERVER] Transaction completed for %s\n.",host);
                     exit(0);
                 }
 
-                int ret;
+                
                 // opcode selects correct function to call
+                // each function gets the connection socket to operate on
+                int ret;
                 switch (opcode)
                 {
                     case OPCODE_OPEN:
-                        // puts("Open!");
+// puts("Open!");
                         ret = call_open(connection);
                         break;
                     case OPCODE_CLOSE:
-                        // puts("Close!");
+// puts("Close!");
                         ret = call_close(connection);
                         break;
                     case OPCODE_READ:
-                        // puts("Read!");
+// puts("Read!");
                         ret = call_read(connection);
                         break;
                     case OPCODE_WRITE:
-                        // puts("Write!");
+// puts("Write!");
                         ret = call_write(connection);
                         break;
                     case OPCODE_SEEK:
-                        // puts("Seek!");
+// puts("Seek!");
                         ret = call_seek(connection);
                         break;
                 }
+
+                // if our return is zero, no errors, otherwise
+                // we provide a modicum of information on what may
+                // have gone wrong.
                 if (ret != 0)
                 {
                    switch(ret)
@@ -174,9 +198,7 @@ int main()
                             perror("Unspecified error");
                             break;
                     } 
-                }                
-                // fprintf(stderr, "Exit code: %d\n",ret);
-                // fflush(stderr);
+                }
 
             }
         }
@@ -185,24 +207,34 @@ int main()
             // Parent, drop this connection, child has it
             close(connection);
         }
-
+    // continue outer server loop. child should never get here.
     }
 
 }
 
+// call_open
+// Reads the open arguments from the client, executes the open
+// system call, then writes the results back to the client
+//
+// expects argument connection: fd to client socket
+//
+// returns an error code if it fails, otherwise returns 0
 int call_open(int connection)
 {
+    // initialize the a buffer to store the path name.
     int bufSize = 80;
     char* pathBuf = malloc(bufSize*sizeof(char));
     if (pathBuf == NULL) return MALLOC_ERROR;
-
     int index = 0;
     char currChar = 0;
     int readval;
 
+    // read in the path.  We know we have the full path
+    // when we reach the null terminator at the end of the
+    // path string
     do 
     {
-        
+        // read the path name byte by byte into currChar
         readval = read(connection, &currChar, 1);
         if (readval == -1) return READ_ERROR;
         if (readval == 0)
@@ -223,12 +255,12 @@ int call_open(int connection)
             if (pathBuf == NULL) return MALLOC_ERROR;
         }
 
+    // we've quit the loop when we've hit the null terminator
     } while (currChar != 0);
 
-    // printf("rx'd path: %s\n",pathBuf);
+// printf("rx'd path: %s\n",pathBuf);
 
-    // now we have to get the flags
-    // puts("reading flags");
+    // now we have to get the flags and make sure they're the right size
     int flags = 0;
     readval = read(connection, &flags, sizeof(int));
     if (readval == 0)
@@ -239,11 +271,9 @@ int call_open(int connection)
     else if (readval != sizeof(int)) return READ_ERROR;
 
     // now we need to get the mode
-    // puts("reading mode");
     mode_t mode = 0;
     readval = read(connection, &mode, sizeof(mode_t));
-    // printf("Read mode: %d bytes\n", readval);
-    // printf("sizeof(mode_t): %d\n", sizeof(mode_t));
+    
     if (readval == 0)
     {
         // socket closed?
@@ -254,7 +284,7 @@ int call_open(int connection)
     // we have built our command... lets try it
     int func_ret = open(pathBuf, flags, mode);
     int func_errno = errno;
-    // printf("opened fd: %d\n", func_ret);
+// printf("opened fd: %d\n", func_ret);
 
     // we're done with pathBuf, free it
     free(pathBuf);
@@ -277,6 +307,13 @@ int call_open(int connection)
     return 0;
 }
 
+// call_close
+// Reads in the client arg, executes the close system call then
+// writes the results back to the client
+//
+// expects argument connection: fd to client socket
+//
+// returns an error code if it fails, otherwise returns 0
 int call_close(int connection)
 {
     // read the file descriptor from the packet
@@ -310,6 +347,13 @@ int call_close(int connection)
 
 }
 
+// call_read
+// Reads in the client arg, executes the read system call then
+// writes the results and the read buffer back to the client
+//
+// expects argument connection: fd to client socket
+//
+// returns an error code if it fails, otherwise returns 0
 int call_read(int connection)
 {
     // read in fd
@@ -368,10 +412,19 @@ int call_read(int connection)
     return 0;
 }
 
+// call_write
+// Reads in the client arg and write buffer, executes the write
+// system call then writes the results back to the client
+//
+// Note, the order of count and the buffer were inverted so count
+// will remainin in a known place in the packet
+//
+// expects argument connection: fd to client socket
+//
+// returns an error code if it fails, otherwise returns 0
 int call_write(int connection)
 {
     // Read in fd
-    // puts("SERVER: Write entered");
     int fd = 0;
     int readval = read(connection, &fd, sizeof(int));
     if (readval == -1) return READ_ERROR;
@@ -380,7 +433,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read");
     }
-    // printf("Got FD from client: %d\n",fd);
+// printf("Got FD from client: %d\n",fd);
 
     // read in count
     size_t count = 0;
@@ -391,7 +444,7 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read");
     }
-    // printf("Got count from client: %d\n",(int)count);
+// printf("Got count from client: %d\n",(int)count);
 
     // read in the data
     unsigned char buf[count];
@@ -402,13 +455,12 @@ int call_write(int connection)
         // socket closed?
         perror("nothing to read");
     }
-    // printf("Got data from client: %s\n",buf);
+// printf("Got data from client: %s\n",buf);
 
     // all data in, now run command
-    // printf("FD: %d\n", fd);
     int func_ret = write(fd, buf, count);
     int func_errno = errno;
-    // perror("write error");
+// perror("write error");
 
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);
@@ -428,6 +480,13 @@ int call_write(int connection)
 
 }
 
+// call_seek
+// Reads in the client arg, executes the lseek system call then
+// writes the results back to the client
+//
+// expects argument connection: fd to client socket
+//
+// returns an error code if it fails, otherwise returns 0
 int call_seek(int connection)
 {
     // read in fd
