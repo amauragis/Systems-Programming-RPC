@@ -21,6 +21,9 @@
 #define WRITE_ERROR     -10
 #define ARGS_ERROR      -11
 #define GETHOST_ERROR   -12
+#define OPEN_ERROR      -13
+#define STAT_ERROR      -14
+#define CLOSE_ERROR     -15
 
 typedef struct sockaddr_in sockaddr_in_t;
 typedef struct sockaddr sockaddr_t;
