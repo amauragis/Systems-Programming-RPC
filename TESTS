@@ -1,0 +1,34 @@
+RPC Testing Description
+Andrew Mauragis
+
+Initially a testing program was developed to ensure familiarity with sockets 
+(which essentially ended up being baby-telnet).  From there a server was
+created that printed arbitrary data.  This allowed the testing of the client
+side packet construction by inspection of the data output on the server.
+
+From here, the server side decode logic was implemented to deconstruct the
+the packet and issue the syscall.  Because the server was already functional,
+returning the packets did not encounter many problems.
+
+Once both sides were developed, forking code was added to the server to allow
+multiple connections.  At this point, testing was done from a functional
+standpoint, where sample client programs were written that would excercise
+a variety of different system calls.  
+
+After each system call was individually tested, the program was tested with
+another students copy, after verifying that he made the read argument swap.
+Initial testing failed, however it was discovered that because he was using a
+Mac, there were differences in data type sizes.  The tests in the previous
+section were repeated successfully.
+
+To test the code end-to-end, the server was started on guardian and the client
+run on a local computer.  A image file was transfered to guardian, and opened
+successfully.  A separate image file was transmitted back from guardian
+correctly as well.  This proved that both the rclient1 and rclient2 programs
+appeared to work correctly with arbitrary binary data.
+
+This test was then repeated, but with both tests run simultaneously.  The
+results were success.
+
+The client programs were then invoked with bad arguments, and the client
+correctly reported errors.

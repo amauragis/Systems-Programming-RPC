@@ -1,3 +1,10 @@
+// rpcdefs.h
+// Andrew Mauragis
+// Due 4/25/13
+//
+// Provides opcode defines, error definitions, and struct typedefs
+// to allow for cleaner code.
+
 #ifndef RPCDEFS_H
 #define RPCDEFS_H
 
@@ -27,8 +34,5 @@
 
 typedef struct sockaddr_in sockaddr_in_t;
 typedef struct sockaddr sockaddr_t;
-
-
-
 
 #endif

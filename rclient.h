@@ -1,3 +1,10 @@
+// rclient.h
+// Andrew Mauragis
+// Due 4/25/13
+//
+// Provides function prototypes for use in user programs as
+// well as provides the entry prototype for rclient.c
+
 #ifndef RCLIENT_H
 #define RCLIENT_H
 

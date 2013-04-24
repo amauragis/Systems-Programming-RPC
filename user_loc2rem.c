@@ -1,3 +1,14 @@
+// user_loc2rem.c (rclient1)
+// Andrew Mauragis
+// Due 4/25/13
+//
+// This is a sample client program for linking with rclient.
+// This program copies a remote file specified by the argument array to the
+// local machine in the current working directory.
+//
+// Note, because there are no provisions for a remote Stat command, file
+// permissions are not perserved.
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -10,9 +21,14 @@
 
 #define BUFFER_SIZE 512
 
+// entry function
+//
+// To be called from rclient's main function, argc and argv are trimmed
+// in rclient to remove the host address and port number
+//
+// returns an error code like a main() would.
 int entry(int argc, char* argv[])
 {
-    
     // first we pull in the file name from the argument array
     if (argc < 2)
     {
@@ -73,54 +89,51 @@ int entry(int argc, char* argv[])
         perror("[Remote] Close Error");
         return CLOSE_ERROR;
     }
-    
 
     return 0;
-
 }
 
+// This is code that was used for debugging during the development of the
+// client and server.
 
-/*
-TESTING CODE:
+// TESTING CODE: 
 
-int rslt = Open("BULLETS", O_CREAT | O_WRONLY, 0644);
-// printf("I opened fd: %d\n", rslt);
+// int rslt = Open("BULLETS", O_CREAT | O_WRONLY, 0644);
+// // printf("I opened fd: %d\n", rslt);
+// // perror("Open");
+
+// // printf("I'm going to try to write 'dicks dicks dicks\\n' to a file\n");
+// int writeval = Write(rslt,"dicks dicks dicks\n", 19);
+// perror("Write");
+
+// // printf("Write return: %d\n", writeval);
+
+// int closeval = Close(rslt);
+// perror("Close");
+// // printf("Close return: %d\n",closeval);
+
+
+// // now lets try to read it back and print it out
+// int fd = Open("BULLETS", O_RDONLY, 0000);
 // perror("Open");
+// // printf("I opened fd %d for reading.\n", fd);
+// char buf[18];
+// int readval = Read(fd, &buf, 17);
+// perror("Read");
+// // printf("I read %d bytes.\n", readval);
+// buf[17] = 0;
 
-// printf("I'm going to try to write 'dicks dicks dicks\\n' to a file\n");
-int writeval = Write(rslt,"dicks dicks dicks\n", 19);
-perror("Write");
+// closeval = Close(fd);
+// perror("Close");
+// // printf("I closed with return val %d\n", closeval);
 
-// printf("Write return: %d\n", writeval);
+// // printf("The buffer I read was:<%s>\n", buf);
 
-int closeval = Close(rslt);
-perror("Close");
-// printf("Close return: %d\n",closeval);
-
-
-// now lets try to read it back and print it out
-int fd = Open("BULLETS", O_RDONLY, 0000);
-perror("Open");
-// printf("I opened fd %d for reading.\n", fd);
-char buf[18];
-int readval = Read(fd, &buf, 17);
-perror("Read");
-// printf("I read %d bytes.\n", readval);
-buf[17] = 0;
-
-closeval = Close(fd);
-perror("Close");
-// printf("I closed with return val %d\n", closeval);
-
-// printf("The buffer I read was:<%s>\n", buf);
-
-fd = Open("BULLETS", O_WRONLY, 0644);
-perror("Open");
-Lseek(fd, 0, SEEK_SET);
-perror("Lseek");
-Write(fd, "DICK", 4);
-perror("Write");
-Close(fd);
-perror("Close");
-
-*/
+// fd = Open("BULLETS", O_WRONLY, 0644);
+// perror("Open");
+// Lseek(fd, 0, SEEK_SET);
+// perror("Lseek");
+// Write(fd, "DICK", 4);
+// perror("Write");
+// Close(fd);
+// perror("Close");

@@ -1,3 +1,14 @@
+// user_rem2loc.c (rclient2)
+// Andrew Mauragis
+// Due 4/25/13
+//
+// This is a sample client program for linking with rclient.
+// This program copies a remote file specified by the argument array to the
+// local machine in the current working directory.
+//
+// Note, because there are no provisions for a remote Stat command, file
+// permissions are not perserved.
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -10,6 +21,12 @@
 
 #define BUFFER_SIZE 512
 
+// entry function
+//
+// To be called from rclient's main function, argc and argv are trimmed
+// in rclient to remove the host address and port number
+//
+// returns an error code like a main() would.
 int entry(int argc, char* argv[])
 {
     // first we pull in the file name from the argument array
@@ -28,7 +45,6 @@ int entry(int argc, char* argv[])
         return OPEN_ERROR;
     }
     
-
     // open the remote copy
     int remfd = Open(filename, O_RDONLY, 000);
     if (remfd < 0)
@@ -66,8 +82,6 @@ int entry(int argc, char* argv[])
         perror("[Remote] Close Error");
         return CLOSE_ERROR;
     }
-    
 
     return 0;
-
 }
