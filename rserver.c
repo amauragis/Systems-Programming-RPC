@@ -143,6 +143,33 @@ int main()
                         case MALLOC_ERROR:
                             perror("Malloc error");
                             break;
+                        case SOCKET_ERROR:
+                            perror("Socket error");
+                            break;
+                        case BIND_ERROR:
+                            perror("Bind error");
+                            break;
+                        case LISTEN_ERROR:
+                            perror("Listen error");
+                            break;
+                        case ACCEPT_ERROR:
+                            perror("Accept error");
+                            break;
+                        case FORKING_ERROR:
+                            perror("Forking error");
+                            break;
+                        case READ_ERROR:
+                            perror("Read error");
+                            break;
+                        case CONNECTION_ERROR:
+                            perror("Connection error");
+                            break;
+                        case WRITE_ERROR:
+                            perror("Write error");
+                            break;
+                        case GETHOST_ERROR
+                            perror("GetHost error");
+                            break;
                         default:
                             perror("Unspecified error");
                             break;

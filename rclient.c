@@ -40,7 +40,11 @@ int main (int argc, char* argv[])
     // populate socket struct
     sockaddr_in_t s;
     struct hostent* hostaddr = gethostbyname(remhost);
-    if(hostaddr == NULL) return GETHOST_ERROR;
+    if(hostaddr == NULL)
+    {
+        perror("GetHost error");
+        return GETHOST_ERROR;
+    } 
 
     memset(&s, 0, sizeof(sockaddr_in_t));
 
