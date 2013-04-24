@@ -77,6 +77,9 @@ int main (int argc, char* argv[])
 
     // Free memory
     free(newArgv);
+    
+    // close socket, we're done
+    close(connection);
     return ret;
 }
 

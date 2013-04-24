@@ -73,6 +73,7 @@ int entry(int argc, char* argv[])
         perror("[Remote] Close Error");
         return CLOSE_ERROR;
     }
+    
 
     return 0;
 
