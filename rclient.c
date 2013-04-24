@@ -122,12 +122,12 @@ int Open(const char* pathname, int flags, mode_t mode)
 
     // write packet to server
     int writeval = write(connection, pkt, pkt_length);
-    // do something to check writeval
+    if (writeval < 0) return WRITE_ERROR;
 
     // get response from server
     int response[2];
     int readval = read(connection, response, 2*sizeof(int));
-    // do something with readval
+    if (readval < 0) return READ_ERROR;
 
     int func_return = response[0];
     int func_errno = response[1];
@@ -161,13 +161,12 @@ int Close(int fd)
 
     // write packet to server
     int writeval = write(connection, pkt, pktLength);
-
-    // check value of write here
+    if (writeval < 0) return WRITE_ERROR;
 
     // get response from server
     int response[2];
     int readval = read(connection, response, 2*sizeof(int));
-    // do something with readval
+    if (readval < 0) return READ_ERROR;
 
     int func_return = response[0];
     int func_errno = response[1];
@@ -204,13 +203,13 @@ ssize_t Read(int fd, void* buf, size_t count)
     }
 
     int writeval = write(connection, pkt, pktLength);
-    // check writeval
+    if (writeval < 0) return WRITE_ERROR;
 
     // get response from server
     int response[2];
     void* readbuf[count];
     int readval = read(connection, response, 2*sizeof(int));
-    // do something with readval
+    if (readval < 0) return READ_ERROR;
 
     // get read buffer from server
     readval = read(connection, readbuf, count);
@@ -260,12 +259,12 @@ ssize_t Write(int fd, const void* buf, size_t count)
 
     // write packet to server
     int writeval = write(connection, pkt, pktLength);
-    // check write val
+    if (writeval < 0) return WRITE_ERROR;
 
     // get response from server
     int response[2];
     int readval = read(connection, response, 2*sizeof(int));
-    // do something with readval
+    if (readval < 0) return READ_ERROR;
 
     int func_return = response[0];
     int func_errno = response[1];
@@ -309,13 +308,13 @@ off_t Lseek(int fd, off_t offset, int whence)
 
     // write packet to server
     int writeval = write(connection, pkt, pktLength);
-    // check write val
+    if (writeval < 0) return WRITE_ERROR;
 
 
     // get response from server
     int response[2];
     int readval = read(connection, response, 2*sizeof(int));
-    // do something with readval
+    if (readval < 0) return READ_ERROR;
 
     int func_return = response[0];
     int func_errno = response[1];

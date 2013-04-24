@@ -167,7 +167,7 @@ int main()
                         case WRITE_ERROR:
                             perror("Write error");
                             break;
-                        case GETHOST_ERROR
+                        case GETHOST_ERROR:
                             perror("GetHost error");
                             break;
                         default:
