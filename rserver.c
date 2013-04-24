@@ -54,7 +54,7 @@ int main()
 
     // print out the port number of the socket
     getsockname(listener, (sockaddr_t*) &lisSocket, (socklen_t*)&length);
-    printf("Server bound to port %d\n", ntohs(lisSocket.sin_port));
+    printf("[RSERVER] Bound to port %d\n", ntohs(lisSocket.sin_port));
 
     // begin listening, we only accept one connection in the listening queue
     if (-1 == listen(listener,1))
@@ -81,13 +81,13 @@ int main()
         getnameinfo((struct sockaddr*)&conSocket, conSocket_len,host,sizeof(host), NULL, 0, 0);
         
 
-        printf("Connection accepted from: %s\n", host);
+        printf("[RSERVER] Connection accepted from: %s\n", host);
 
         // now we have to fork to make sure we can allow additional connections
         pid_t pid = fork();
         if (pid == -1)
         {
-            perror("We forking failed");
+            perror("Fork error");
             return FORKING_ERROR;
         }
         else if (pid == 0)
@@ -107,7 +107,7 @@ int main()
                 else if (readval == 0)
                 {
                     // nothing read
-                    puts("Operatation completed");
+                    printf("[RSERVER] Transaction completed for %s\n.",host);
                     exit(0);
                 }
 
@@ -148,8 +148,8 @@ int main()
                             break;
                     } 
                 }                
-                fprintf(stderr, "Exit code: %d\n",ret);
-                fflush(stderr);
+                // fprintf(stderr, "Exit code: %d\n",ret);
+                // fflush(stderr);
 
             }
         }
@@ -181,7 +181,7 @@ int call_open(int connection)
         if (readval == 0)
         {
             // socket closed?
-            perror("nothing to read. Socket closed?");
+            perror("nothing to read");
         }
 
         // write current character into path buffer
@@ -198,16 +198,16 @@ int call_open(int connection)
 
     } while (currChar != 0);
 
-    printf("rx'd path: %s\n",pathBuf);
+    // printf("rx'd path: %s\n",pathBuf);
 
     // now we have to get the flags
-    puts("reading flags");
+    // puts("reading flags");
     int flags = 0;
     readval = read(connection, &flags, sizeof(int));
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     else if (readval != sizeof(int)) return READ_ERROR;
 
@@ -215,19 +215,19 @@ int call_open(int connection)
     // puts("reading mode");
     mode_t mode = 0;
     readval = read(connection, &mode, sizeof(mode_t));
-    printf("Read mode: %d bytes\n", readval);
-    printf("sizeof(mode_t): %d\n", sizeof(mode_t));
+    // printf("Read mode: %d bytes\n", readval);
+    // printf("sizeof(mode_t): %d\n", sizeof(mode_t));
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     else if (readval != sizeof(mode_t)) return READ_ERROR;
 
     // we have built our command... lets try it
     int func_ret = open(pathBuf, flags, mode);
     int func_errno = errno;
-    printf("opened fd: %d\n", func_ret);
+    // printf("opened fd: %d\n", func_ret);
 
     // we're done with pathBuf, free it
     free(pathBuf);
@@ -242,7 +242,7 @@ int call_open(int connection)
     if (writeval == 0)
     {
         // socket closed?
-        perror("cannot write. Socket closed?");
+        perror("cannot write");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
@@ -259,7 +259,7 @@ int call_close(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     // have all parameters now run command
     int func_ret = close(fd);
@@ -275,7 +275,7 @@ int call_close(int connection)
     if (writeval == 0)
     {
         // socket closed?
-        perror("cannot write. Socket closed?");
+        perror("cannot write");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
@@ -292,7 +292,7 @@ int call_read(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
 
     // read in count
@@ -302,7 +302,7 @@ int call_read(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
 
     // run command
@@ -334,7 +334,7 @@ int call_read(int connection)
     if (writeval == 0)
     {
         // socket closed?
-        perror("cannot write. Socket closed?");
+        perror("cannot write");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
@@ -351,7 +351,7 @@ int call_write(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     // printf("Got FD from client: %d\n",fd);
 
@@ -362,7 +362,7 @@ int call_write(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     // printf("Got count from client: %d\n",(int)count);
 
@@ -373,7 +373,7 @@ int call_write(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
     // printf("Got data from client: %s\n",buf);
 
@@ -381,7 +381,7 @@ int call_write(int connection)
     // printf("FD: %d\n", fd);
     int func_ret = write(fd, buf, count);
     int func_errno = errno;
-    perror("write error");
+    // perror("write error");
 
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);
@@ -393,7 +393,7 @@ int call_write(int connection)
     if (writeval == 0)
     {
         // socket closed?
-        perror("cannot write. Socket closed?");
+        perror("cannot write");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
@@ -410,7 +410,7 @@ int call_seek(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
 
     // read in offset
@@ -420,7 +420,7 @@ int call_seek(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
 
     // read in whence
@@ -430,7 +430,7 @@ int call_seek(int connection)
     if (readval == 0)
     {
         // socket closed?
-        perror("nothing to read. Socket closed?");
+        perror("nothing to read");
     }
 
     // run lseek
@@ -447,7 +447,7 @@ int call_seek(int connection)
     if (writeval == 0)
     {
         // socket closed?
-        perror("cannot write. Socket closed?");
+        perror("cannot write");
     }
     else if (writeval < pktLength) return WRITE_ERROR;
 
