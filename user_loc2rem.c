@@ -8,6 +8,8 @@
 #include "rclient.h"
 #include "rpcdefs.h"
 
+#define BUFFER_SIZE 512
+
 int entry(int argc, char* argv[])
 {
     
@@ -44,8 +46,8 @@ int entry(int argc, char* argv[])
 
     // now we read locally and write remotely
     int bytesRead;
-    unsigned char buf[4096];
-    while ((bytesRead = read(locfd, &buf, 4096)) > 0)
+    unsigned char buf[BUFFER_SIZE];
+    while ((bytesRead = read(locfd, &buf, BUFFER_SIZE)) > 0)
     {
         if (0 >= Write(remfd, &buf, bytesRead))
         {
