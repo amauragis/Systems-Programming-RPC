@@ -229,6 +229,9 @@ int call_open(int connection)
     int func_errno = errno;
     printf("opened fd: %d\n", func_ret);
 
+    // we're done with pathBuf, free it
+    free(pathBuf);
+
     // now we have to write our message back, which is the return and error values
     int pktLength = 2*sizeof(int);
     int pkt[2];
