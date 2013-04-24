@@ -37,19 +37,19 @@ int entry(int argc, char* argv[])
     }
     char* filename = argv[1];
 
-    // open up the file to write to
-    int locfd = open(filename, O_CREAT| O_WRONLY, 0644);
-    if (locfd < 0)
-    {
-        perror("[Local] Open Error");
-        return OPEN_ERROR;
-    }
-    
     // open the remote copy
     int remfd = Open(filename, O_RDONLY, 000);
     if (remfd < 0)
     {
         perror("[Remote] Open Error");
+        return OPEN_ERROR;
+    }
+
+    // open up the file to write to
+    int locfd = open(filename, O_CREAT| O_WRONLY, 0644);
+    if (locfd < 0)
+    {
+        perror("[Local] Open Error");
         return OPEN_ERROR;
     }
 
